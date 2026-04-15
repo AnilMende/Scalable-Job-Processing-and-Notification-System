@@ -8,28 +8,22 @@ import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 
 // generating the access token
-function generateAccessToken(user) {
+export const generateAccessToken = (user) => {
+    
     return jwt.sign(
-        {
-            id: user._id
-        },
+        { id : user._id },
         process.env.ACCESS_TOKEN_SECRET,
-        {
-            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
-        }
+        { expiresIn : process.env.ACCESS_TOKEN_EXPIRY }
     )
 }
 
 // generate the refresh token
-function generateRefreshToken(user) {
+export const generateRefreshToken = (user) => {
+
     return jwt.sign(
-        {
-            id: user._id
-        },
+        { id : user._id },
         process.env.REFRESH_TOKEN_SECRET,
-        {
-            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
-        }
+        { expiresIn : process.env.REFRESH_TOKEN_EXPIRY }
     )
 }
 
@@ -161,7 +155,7 @@ export const handleLogout = asyncHandler(async (req, res) => {
         //find the user with the hashed refresh token and make it null
         await User.findOneAndUpdate(
             { refreshToken: hashedRefreshToken },
-            { $set: { refreshToken: null } }
+            { $unset: { refreshToken: 1 } }
         );
     }
 
@@ -204,12 +198,12 @@ export const handleRefresh = asyncHandler(async (req, res) => {
         sameSite: "Strict",
         maxAge: 7 * 24 * 60 * 60 * 1000
     })
-        .status(201)
+        .status(200)
         .json(
             new ApiResponse(
-                201,
+                200,
                 { accessToken: newAccessToken },
-                "Access Token Refreshed"
+                "Token Refreshed"
             )
         )
 

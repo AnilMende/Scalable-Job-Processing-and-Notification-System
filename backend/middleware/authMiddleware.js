@@ -4,40 +4,50 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 
 import jwt from "jsonwebtoken";
 
+export const verifyAccessToken = asyncHandler(async (req, res, next) => {
 
-export const verifyRefreshToken = asyncHandler( async(req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1];
 
-    const token = req.cookies?.refreshToken;
-
-    if(!token){
+    if (!token) {
         throw new ApiError(401, "Unauthorized");
     }
 
-    //refreshToken avialable then hash it
-    const hashedToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    const user = await User.findOne({ refreshToken : hashedToken });
+    const user = await User.findById(decoded.id).select("-password");
 
-    if(!user){
-        throw new ApiError(401, "Invalid refresh token");
+    if (!user) {
+        throw new ApiError(401, "Invalid token");
     }
 
-    //user exists with the refresh token then verify the token with jwt
+    req.user = user;
 
-    try {
+    next();
+})
 
-        jwt.verify(token , process.env.REFRESH_TOKEN_SECRET);
-        
-    } catch (error) {
+
+export const verifyRefreshToken = asyncHandler(async (req, res, next) => {
+
+    const token = req.cookies?.refreshToken;
+
+    if (!token) {
+        throw new ApiError(401, "Unauthorized");
+    }
+
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+    const user = await User.findById(decoded.id);
+
+    if(!user || user.refreshToken !== hashedToken){
         throw new ApiError(401, "Invalid or expired refresh token");
     }
 
-    //if both user and token are valid then add them with request
     req.user = user;
-    req.refreshToken = token;
 
     //next is to pass the access to the other controller in the route
     next();

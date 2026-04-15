@@ -11,12 +11,12 @@ authRouter.post("/register", handleRegister);
 //login api
 authRouter.post("/login", handleLogin);
 
-//logout api
-authRouter.put("/logout", handleLogout);
-
 //handle refresh api
 //middleware validates existing refresh token in cookies
 //and controller generates new access and refresh tokens
 authRouter.post("/refresh-token", verifyRefreshToken, handleRefresh);
+
+//logout api
+authRouter.put("/logout", handleLogout);
 
 export default authRouter;
