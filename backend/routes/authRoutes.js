@@ -1,6 +1,7 @@
 import express from "express";
 import { handleLogin, handleLogout, handleRefresh, handleRegister } from "../controllers/authController.js";
 import { verifyRefreshToken } from "../middleware/authMiddleware.js";
+import { authLimiter } from "../middleware/authLimiter.js";
 
 const authRouter = express.Router();
 
@@ -9,7 +10,7 @@ const authRouter = express.Router();
 authRouter.post("/register", handleRegister);
 
 //login api
-authRouter.post("/login", handleLogin);
+authRouter.post("/login", authLimiter, handleLogin);
 
 //handle refresh api
 //middleware validates existing refresh token in cookies
