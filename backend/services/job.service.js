@@ -7,13 +7,26 @@ export const createJobService = async (userId) => {
     console.log("Creating job in DB...");
     const job = await Job.create({
         userId,
-        status : "pending"
+        status: "pending"
     });
 
     //adding job to the queue
-    await jobQueue.add("process-job", {
-        jobId : job._id
-    });
+    await jobQueue.add("process-job",
+        { jobId: job._id },
+        {   
+            //total tries for a failed process
+            attempts : 3,
+            backoff : {
+                type : "exponential",
+                //delay is exponential on first try it will be 2s then 4s then 8s
+                delay : 2000
+            },
+            //job will be remove on it's completion
+            removeOnComplete : true,
+            //keep failed jobs
+            removeOnFail : false
+        }
+    );
 
     console.log("Job added to queue: ", job._id);
 
