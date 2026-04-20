@@ -1,8 +1,18 @@
 import IORedis from "ioredis";
+import dotenv from "dotenv";
+dotenv.config();
 
-const connection = new IORedis(process.env.REDIS_URL, {
+import { ApiError } from "../utils/ApiError.js";
+
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+    throw new ApiError("REDIS_URL is not defined in environment variables");
+}
+
+const connection = new IORedis(redisUrl, {
     maxRetriesPerRequest: null,
-    tls: process.env.REDIS_URL.includes("rediss://")
+    tls: redisUrl.startsWith("rediss://")
         ? { rejectUnauthorized: false }
         : undefined
 });

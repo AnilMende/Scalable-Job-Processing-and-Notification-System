@@ -3,15 +3,18 @@ import mongoose from "mongoose";
 const jobSchema =  new mongoose.Schema({
 
     userId : {
-        type : String,
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "User",
         required : true
     },
     status : {
+        type : String,
         enum : ["pending", "processing", "completed", "failed"],
         default : "pending"
     },
     attempts : {
         type : Number,
+        default : 0
     },
     result : {
         type : String,
@@ -21,4 +24,4 @@ const jobSchema =  new mongoose.Schema({
     }
 });
 
-export const Job = mongoose.model("JOB", jobSchema);
+export const Job = mongoose.model("Job", jobSchema);

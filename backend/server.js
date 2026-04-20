@@ -6,6 +6,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 
 import authRouter from "./routes/authRoutes.js";
+import jobRouter from "./routes/jobRoutes.js";
 
 
 const app = express();
@@ -27,5 +28,7 @@ await connectDB();
 
 // Auth Api Endpoint
 app.use("/api/auth", authRouter);
+
+app.use("/api/jobs", jobRouter);
 
 app.listen(PORT, () => console.log(`Server started running at PORT:${PORT}`));
