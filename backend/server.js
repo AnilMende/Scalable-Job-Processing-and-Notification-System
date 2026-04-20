@@ -7,6 +7,7 @@ import connectDB from "./config/db.js";
 
 import authRouter from "./routes/authRoutes.js";
 import jobRouter from "./routes/jobRoutes.js";
+import syncPendingJobs from "./utils/syncPendingJobs.js";
 
 
 const app = express();
@@ -23,6 +24,8 @@ const PORT = process.env.PORT || 5000;
 // MongoDB connection
 await connectDB();
 
+//syncing pending jobs
+await syncPendingJobs();
 
 // Api End Points
 
