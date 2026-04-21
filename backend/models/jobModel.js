@@ -19,9 +19,15 @@ const jobSchema =  new mongoose.Schema({
     result : {
         type : String,
     },
+    //this is a flag to prevent re-queue
+    isQueued : {
+        type : Boolean,
+        default : false
+    },
     failedReason : {
         type : String
     }
+    
 });
 
 export const Job = mongoose.model("Job", jobSchema);

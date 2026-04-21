@@ -13,7 +13,7 @@ import { ApiError } from "../utils/ApiError.js";
 const worker = new Worker(
     "job-queue",
     async (job) => {
-        console.log("Processing Job", job.id, job.data);
+        console.log(`Processing Job ${job.id} on PID ${process.pid}`);
 
         //mark processing
         await Job.findByIdAndUpdate(job.data.jobId, {
@@ -21,29 +21,27 @@ const worker = new Worker(
         });
 
         try {
-            //simualte random failure
-            if (Math.random() < 0.5) {
-                throw new ApiError("Random job failure");
-            }
 
             //simulate the work
             await new Promise((res) => setTimeout(res, 2000));
 
             await Job.findByIdAndUpdate(job.data.jobId, {
                 status: "completed",
-                result: "Job processed successfully"
+                result: "Job processed successfully",
             });
 
-            console.log("Job Completed", job.id);
+            console.log(`Job Completed ${job.id} on PID ${process.pid}`);
 
         } catch (error) {
 
             console.log("Job attempt failed", job.id);
 
             //update attempts
-            await Job.findByIdAndUpdate(job.id.jobId, {
+            await Job.findByIdAndUpdate(job.data.jobId, {
+                status: "failed",
+                failedReason: error.message,
                 $inc: { attempts: 1 },
-                failedReason: error.message
+                isQueued : false
             })
 
             //throw error so BullMq retries
@@ -51,7 +49,11 @@ const worker = new Worker(
         }
 
     },
-    { connection }
+    {
+        connection,
+        concurrency: 2
+
+    }
 );
 
 // BullMQ emits event when job fails permanently
@@ -60,8 +62,8 @@ worker.on("failed", async (job, err) => {
 
     //move to failed state in DB
     await Job.findByIdAndUpdate(job.data.jobId, {
-        status : "failed",
-        failedReason : err.message
+        status: "failed",
+        failedReason: err.message
     });
 });
 
