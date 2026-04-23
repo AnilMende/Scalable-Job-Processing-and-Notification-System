@@ -6,9 +6,10 @@ await connectDB();
 
 import { Worker } from "bullmq";
 import { Job } from "../models/jobModel.js";
-import connection from "../config/redis.js";
+import { getRedisClient } from "../config/redis.js";
 import { ApiError } from "../utils/ApiError.js";
 
+const connection = await getRedisClient();
 
 const worker = new Worker(
     "job-queue",
@@ -23,7 +24,7 @@ const worker = new Worker(
         try {
 
             //simulate the work
-            await new Promise((res) => setTimeout(res, 300));
+            await new Promise((res) => setTimeout(res, 200));
 
             await Job.findByIdAndUpdate(job.data.jobId, {
                 status: "completed",

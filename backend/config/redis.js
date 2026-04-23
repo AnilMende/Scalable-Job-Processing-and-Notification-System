@@ -1,28 +1,33 @@
-import IORedis from "ioredis";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { ApiError } from "../utils/ApiError.js";
+import { createClient } from "redis";
 
-const redisUrl = process.env.REDIS_URL;
+let redisClient;
 
-if (!redisUrl) {
-    throw new ApiError("REDIS_URL is not defined in environment variables");
-}
+export const getRedisClient = async () => {
+    if (!redisClient) {
 
-const connection = new IORedis(redisUrl, {
-    maxRetriesPerRequest: null,
-    tls: redisUrl.startsWith("rediss://")
-        ? { rejectUnauthorized: false }
-        : undefined
-});
+        const isTLS = process.env.REDIS_URL.startsWith("rediss://");
 
-connection.on("connect", () => {
-    console.log("Connected to Redis");
-})
+        redisClient = createClient({
+            url: process.env.REDIS_URL,
+            socket: isTLS
+                ? {
+                      tls: true,
+                      rejectUnauthorized: false
+                  }
+                : {}
+        });
 
-connection.on("error", (err) => {
-    console.error("Redis Error:", err);
-})
+        redisClient.on("error", (err) => {
+            console.log("Redis Error:", err);
+        });
 
-export default connection;
+        await redisClient.connect();
+
+        console.log("Connected to Redis");
+    }
+
+    return redisClient;
+};

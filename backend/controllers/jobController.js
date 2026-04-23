@@ -14,16 +14,16 @@ export const createJob = asyncHandler(async (req, res) => {
 
     //const queueSize = waiting + active;
 
-    if (waiting > 150 || active > 80) {
+    if (waiting > 150 || active > 50) {
         return res.status(429).json({
-            success: false,
             message: "Server busy"
         });
     }
 
-    console.log("Queue:", { waiting, active });
 
     const job = await createJobService(req.user._id);
+
+    console.log("API HIT Created Job");
 
     return res.status(200).json(
         new ApiResponse(200, "Job Created Successfully", job)

@@ -5,7 +5,7 @@ import { createJob, getAllJobs } from "../controllers/jobController.js";
 const jobRouter = express.Router();
 
 
-jobRouter.post("/create-job", verifyAccessToken, createJob);
+jobRouter.post("/create-job",verifyAccessToken, createJob);
 
 jobRouter.get("/all-jobs", verifyAccessToken, getAllJobs);
 

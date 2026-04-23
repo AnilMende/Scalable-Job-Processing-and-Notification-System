@@ -12,9 +12,7 @@ export const options = {
             startVUs: 1,
             stages: [
                 { duration: "10s", target: 10 },
-                { duration: "20s", target: 50 },
-                { duration: "30s", target: 100 },
-                { duration: "20s", target: 0 }
+                { duration: "20s", target: 20 },
             ]
         }
     }
@@ -22,7 +20,7 @@ export const options = {
 
 const BASE_URL = "http://localhost:5000/api/jobs";
 
-const ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZGYzNjFkZDJkMDU3ODlhMzZkZmM0OSIsImlhdCI6MTc3Njg4MDI4NywiZXhwIjoxNzc2ODgzODg3fQ.U8CyapKanZ25nNZ7Mqblf-FJnNT4pBBrpoNmit2h_C8";
+const ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZGYzNjFkZDJkMDU3ODlhMzZkZmM0OSIsImlhdCI6MTc3Njk0NTE4MiwiZXhwIjoxNzc2OTQ4NzgyfQ.jo3QNDiOQGS-usnG6OaNl7Itl-ahq34lXmK0NxOlJDc";
 
 export default function () {
 

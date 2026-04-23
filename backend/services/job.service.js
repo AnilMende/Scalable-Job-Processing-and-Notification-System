@@ -11,26 +11,12 @@ export const createJobService = async (userId) => {
         isQueued: false
     });
 
-    // 🔥 Mark as queued FIRST (atomic safety)
-    const updated = await Job.findOneAndUpdate(
-        {
-            _id: job._id,
-            isQueued: false
-        },
-        {
-            isQueued: true
-        }
-    );
-
-    if (!updated) {
-        console.log("Job already queued, skipping...");
-        return job;
-    }
 
     //adding job to the queue
     await jobQueue.add("process-job",
-        { jobId: job._id, isQueued: true },
+        { jobId: job._id },
         {
+            jobId : job._id.toString(),
             //total tries for a failed process
             attempts: 3,
             backoff: {
