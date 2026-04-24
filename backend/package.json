@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
-    "worker":"node workers/job.worker.js"
+    "worker": "node workers/job.worker.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -21,6 +21,7 @@
     "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "socket.io": "^4.8.3"
   }
 }

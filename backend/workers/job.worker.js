@@ -9,6 +9,18 @@ import { Job } from "../models/jobModel.js";
 import { getRedisClient } from "../config/redis.js";
 import { ApiError } from "../utils/ApiError.js";
 
+import { createClient } from "redis";
+
+const pub = createClient({
+    socket : {
+        host : "127.0.0.1",
+        port : 6379
+    }
+});
+
+
+await pub.connect();
+
 const connection = await getRedisClient();
 
 const worker = new Worker(
@@ -21,6 +33,13 @@ const worker = new Worker(
             status: "processing"
         });
 
+        //Publish processing event
+        await pub.publish("job-updates", JSON.stringify({
+            jobId : job.data.jobId,
+            status : "processing"
+        }));
+
+
         try {
 
             //simulate the work
@@ -30,6 +49,12 @@ const worker = new Worker(
                 status: "completed",
                 result: "Job processed successfully",
             });
+
+            //Publishing update event
+            await pub.publish("job-updates", JSON.stringify({
+                jobId : job.data.jobId,
+                status : "completed"
+            }));
 
             console.log(`Job Completed ${job.id} on PID ${process.pid}`);
 
@@ -42,8 +67,14 @@ const worker = new Worker(
                 status: "failed",
                 failedReason: error.message,
                 $inc: { attempts: 1 },
-                isQueued : false
+                isQueued: false
             })
+
+            //Publsih failed event
+            await pub.publish("job-updates", JSON.stringify({
+                jobId : job.data.jobId,
+                status : "failed"
+            }));
 
             //throw error so BullMq retries
             throw error;
@@ -51,9 +82,9 @@ const worker = new Worker(
 
     },
     {
-        connection : {
-            host : "127.0.0.1",
-            port : 6379
+        connection: {
+            host: "127.0.0.1",
+            port: 6379
         },
         concurrency: 10
 
