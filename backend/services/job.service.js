@@ -25,9 +25,13 @@ export const createJobService = async (userId) => {
                 delay: 2000
             },
             //job will be remove on it's completion
-            removeOnComplete: true,
+            removeOnComplete: {
+                count : 100
+            },
             //keep failed jobs
-            removeOnFail: false
+            removeOnFail: {
+                count : 50
+            }
         }
     );
 
