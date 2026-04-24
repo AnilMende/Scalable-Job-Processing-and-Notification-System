@@ -24,7 +24,7 @@ const worker = new Worker(
         try {
 
             //simulate the work
-            await new Promise((res) => setTimeout(res, 200));
+            await new Promise((res) => setTimeout(res, 300));
 
             await Job.findByIdAndUpdate(job.data.jobId, {
                 status: "completed",
@@ -51,7 +51,10 @@ const worker = new Worker(
 
     },
     {
-        connection,
+        connection : {
+            host : "127.0.0.1",
+            port : 6379
+        },
         concurrency: 10
 
     }

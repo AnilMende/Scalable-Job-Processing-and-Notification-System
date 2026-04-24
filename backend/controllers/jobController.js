@@ -13,12 +13,14 @@ export const createJob = asyncHandler(async (req, res) => {
     const active = await jobQueue.getActiveCount();
 
     //const queueSize = waiting + active;
-
+    //this is the backpressure control
     if (waiting > 150 || active > 50) {
         return res.status(429).json({
             message: "Server busy"
         });
     }
+
+    console.log({ waiting, active});
 
 
     const job = await createJobService(req.user._id);
