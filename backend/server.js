@@ -19,12 +19,19 @@ const app = express();
 
 const server = http.createServer(app);
 
+// ✅ Apply CORS to Express (VERY IMPORTANT)
+app.use(cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true
+}));
+
 app.use(express.json());
 
 const io = new Server(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "PUT", "POST", "PATCH", "UPDATE", "DELETE"]
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"]
     }
 })
 

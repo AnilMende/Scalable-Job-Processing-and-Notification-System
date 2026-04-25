@@ -28,17 +28,17 @@ export const createJob = asyncHandler(async (req, res) => {
     console.log("API HIT Created Job");
 
     return res.status(200).json(
-        new ApiResponse(200, "Job Created Successfully", job)
+        new ApiResponse(200, job, "Job Created Successfully")
     );
 });
 
 
 export const getAllJobs = asyncHandler(async (req, res) => {
 
-    const jobs = await Job.find();
+    const jobs = await Job.find().sort({ createdAt : -1}).limit(10);
 
     return res.status(200).json(
-        new ApiResponse(200, "All jobs fetched successfully", jobs)
+        new ApiResponse(200, jobs, "Jobs Fetched")
     );
 })
 
