@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { socket } from "../socket.js";
 
@@ -7,27 +7,9 @@ import toast from "react-hot-toast";
 import Charts from "../components/Charts.jsx";
 import ActivityFeed from "../components/ActivityFeed.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
-
+import StatCard from "../components/StatCard.jsx";
 
 const Dashboard = () => {
-
-    const StatCard = ({ title, value }) => (
-        <div className="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition duration-300">
-            <p className="text-gray-500 text-sm">{title}</p>
-            <h2 className="text-2xl font-bold mt-2">{value}</h2>
-        </div>
-    );
-
-    const showToast = (msg) => {
-        toast.success(msg, {
-            style: {
-                borderRadius: "10px",
-                background: "#333",
-                color: "#fff"
-            }
-        })
-    };
-
 
     const [jobs, setJobs] = useState([]);
     const [stats, setStats] = useState({
@@ -41,8 +23,15 @@ const Dashboard = () => {
     const [activities, setActivities] = useState([]);
     const [statusHistory, setStatusHistory] = useState([]);
 
+    const [throughput, setThroughPut] = useState(0);
 
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZGYzNjFkZDJkMDU3ODlhMzZkZmM0OSIsImlhdCI6MTc3NzE5MTMwNiwiZXhwIjoxNzc3MTk0OTA2fQ.ch9cI3two9pWQUZbQYO_rgTPVshf8lJ9QPprrZqS5i0"
+    const prevStatsRef = useRef({
+        completed: 0,
+        time: Date.now()
+    })
+
+
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZGYzNjFkZDJkMDU3ODlhMzZkZmM0OSIsImlhdCI6MTc3NzIzMDMwNSwiZXhwIjoxNzc3MjMzOTA1fQ.x0Nn9nDaEFWQAf1wJLetkbsbjim37LUCM3wvXEzkcWI"
 
     // Fetch stats
     const fetchStats = async () => {
@@ -57,13 +46,33 @@ const Dashboard = () => {
 
         setStats(data);
 
+        // Throughput Calculation
+        const now = Date.now();
+
+        const prev = prevStatsRef.current;
+
+        const deltaJobs = data.completed - prev.completed;
+
+        const deltaTime = (now - prev.time) / 1000; //seconds
+
+        const jobsPerSec = deltaTime > 0 ? deltaJobs / deltaTime : 0;
+
+        setThroughPut(jobsPerSec.toFixed(2));
+
+        // update reference
+        prevStatsRef.current = {
+            completed: data.completed,
+            time: now
+        };
+
         // push into history (important for chart)
         setStatusHistory(prev => [
-            ...prev.slice(-10),
+            ...prev.slice(-15),
             {
                 time: new Date().toLocaleTimeString(),
                 completed: data.completed,
-                failed: data.failed
+                failed: data.failed,
+                throughput: jobsPerSec
             }
         ]);
     };
@@ -128,14 +137,18 @@ const Dashboard = () => {
         fetchStats();
         fetchJobs();
 
-        socket.on("job-update", (data) => {
+        // AUTO REFRESH
+        const interval = setInterval(() => {
             fetchStats();
-            //console.log("Live:", data);
+        }, 2000); // every 2 seconds
+
+        // SOCKET LISTENER
+        socket.on("job-update", (data) => {
+
+            const incomingId = String(data.jobId);
 
             // Update jobs
             setJobs((prev) => {
-                const incomingId = String(data.jobId);
-
                 const exists = prev.find(j => j.jobId === incomingId);
 
                 if (exists) {
@@ -149,53 +162,53 @@ const Dashboard = () => {
                 }
             });
 
-            // Acitivity Feed (keep last 10)
+            // Activity Feed
             setActivities(prev => [
-                { jobId : data.jobId, status: data.status },
+                { jobId: incomingId, status: data.status },
                 ...prev.slice(0, 9)
             ]);
 
-
-            // Status History for chart
-            setStatusHistory(prev => [
-                ...prev.slice(-10),
-                {
-                    time: new Date().toLocaleTimeString(),
-                    completed: data.completed,
-                    failed: data.failed
-                }
-            ]);
-
-            //fetchStats();
         });
 
-        return () => socket.off("job-update");
+        return () => {
+            socket.off("job-update");
+            clearInterval(interval);
+        };
+
     }, []);
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Job Processing Dashboard</h1>
+                <h1 className="text-2xl font-bold">Job Processing Dashboard</h1>
+
+                <div className="flex items-center gap-3">
+                    <span className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></span>
+                    <span className="text-sm text-gray-500">System Live</span>
+                </div>
 
                 <button
                     onClick={createJob}
-                    className="bg-blue-600 hover:bg-blue-700 text-white 
-                    px-5 py-2 rounded-xl cursor-pointer"
+                    className="bg-linear-to-r from-blue-600 to-indigo-600 
+               text-white px-5 py-2 rounded-xl 
+               shadow hover:scale-105 active:scale-95 
+               transition duration-200 mb-6 cursor-pointer"
                 >
                     + Create Job
                 </button>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <StatCard title="Waiting" value={stats.waiting} />
-                <StatCard title="Active" value={stats.active} />
-                <StatCard title="Completed" value={stats.completed} />
-                <StatCard title="Failed" value={stats.failed} />
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <StatCard title="Waiting" value={stats?.waiting} />
+                <StatCard title="Active" value={stats?.active} />
+                <StatCard title="Completed" value={stats?.completed} />
+                <StatCard title="Failed" value={stats?.failed} />
+                <StatCard title="Throughput" value={`${throughput} /s`} />
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="col-span-2">
                     <Charts stats={stats} statusHistory={statusHistory} />
                 </div>
@@ -204,38 +217,39 @@ const Dashboard = () => {
             </div>
 
             {/* Job Table */}
-            <div className="bg-white rounded-2xl shadow-md overflow-hidden">
-                <table className="w-full text-left">
-                    <thead className="bg-gray-50 border-b">
+            <div className="bg-white shadow rounded-2xl overflow-hidden">
+                <table className="w-full text-sm">
+                    <thead className="bg-gray-100">
                         <tr>
-                            <th className="p-4">Job ID</th>
-                            <th>Status</th>
+                            <th className="p-3 text-left">Job ID</th>
+                            <th className="text-left">Status</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {jobs.map((job) => (
-                            <tr
-                                key={job.jobId}
-                                className="border-b hover:bg-gray-50 transition duration-200"
-                            >
-                                <td className="p-4 font-mono text-sm text-gray-700">
-                                    {job.jobId}
-                                </td>
-
-                                <td>
-                                    <StatusBadge status={job.status} />
+                        {jobs.length === 0 ? (
+                            <tr>
+                                <td colSpan="2" className="text-center py-6 text-gray-400">
+                                    No jobs yet
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            jobs.map((job) => (
+                                <tr
+                                    key={job.jobId}
+                                    className="border-b hover:bg-gray-50 transition"
+                                >
+                                    <td className="p-3 font-mono">
+                                        {job.jobId.slice(-10)}
+                                    </td>
+                                    <td>
+                                        <StatusBadge status={job.status} />
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
-
-                {jobs.length === 0 && (
-                    <div className="text-center py-10 text-gray-400">
-                        No jobs yet. Create one to start 🚀
-                    </div>
-                )}
             </div>
 
         </div>

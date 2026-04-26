@@ -30,8 +30,10 @@ const Charts = ({ statusHistory, stats }) => {
                     <XAxis dataKey="time" />
                     <YAxis />
                     <Tooltip />
+                    
                     <Line type="monotone" dataKey="completed" stroke="#22c55e" />
                     <Line type="monotone" dataKey="failed" stroke="#ef4444" />
+                    <Line type="monotone" dataKey="throughput" stroke="#3b82f6" />
                 </LineChart>
             </div>
 
