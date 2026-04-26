@@ -2,8 +2,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { socket } from "../socket.js";
-import StatusBadge from "./StatusBadge.jsx";
+
 import toast from "react-hot-toast";
+import Charts from "../components/Charts.jsx";
+import ActivityFeed from "../components/ActivityFeed.jsx";
+import StatusBadge from "../components/StatusBadge.jsx";
 
 
 const Dashboard = () => {
@@ -35,7 +38,11 @@ const Dashboard = () => {
     });
 
 
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZGYzNjFkZDJkMDU3ODlhMzZkZmM0OSIsImlhdCI6MTc3NzEwMDk1MCwiZXhwIjoxNzc3MTA0NTUwfQ.6SJfiYhzdhN5l1j5itG_71PbR7TtETc1B2MItcm1-SM"
+    const [activities, setActivities] = useState([]);
+    const [statusHistory, setStatusHistory] = useState([]);
+
+
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZGYzNjFkZDJkMDU3ODlhMzZkZmM0OSIsImlhdCI6MTc3NzE5MTMwNiwiZXhwIjoxNzc3MTk0OTA2fQ.ch9cI3two9pWQUZbQYO_rgTPVshf8lJ9QPprrZqS5i0"
 
     // Fetch stats
     const fetchStats = async () => {
@@ -45,7 +52,20 @@ const Dashboard = () => {
                 Authorization: `Bearer ${token}`
             }
         });
-        setStats(res.data.data);
+
+        const data = res.data.data;
+
+        setStats(data);
+
+        // push into history (important for chart)
+        setStatusHistory(prev => [
+            ...prev.slice(-10),
+            {
+                time: new Date().toLocaleTimeString(),
+                completed: data.completed,
+                failed: data.failed
+            }
+        ]);
     };
 
     // Fetch Jobs from DB
@@ -67,7 +87,7 @@ const Dashboard = () => {
     // Create job
     const createJob = async () => {
         try {
-            console.log("Creating job...");
+            //console.log("Creating job...");
 
             const res = await axios.post(
                 "http://localhost:5000/api/jobs/create-job",
@@ -79,14 +99,19 @@ const Dashboard = () => {
                 }
             );
 
-            console.log("API Response:", res.data);
+            // console.log("API Response:", res.data);
 
             const jobId = String(res.data.data._id);
 
-            // ✅ IMMEDIATE UI update
+            // UI update on job creation
             setJobs(prev => [
                 { jobId, status: "pending" },
                 ...prev
+            ]);
+
+            setActivities(prev => [
+                { jobId, status: "pending" },
+                ...prev.slice(0, 9)
             ]);
 
             toast.success("Job created successfully");
@@ -104,7 +129,8 @@ const Dashboard = () => {
         fetchJobs();
 
         socket.on("job-update", (data) => {
-            console.log("Live:", data);
+            fetchStats();
+            //console.log("Live:", data);
 
             // Update jobs
             setJobs((prev) => {
@@ -123,7 +149,24 @@ const Dashboard = () => {
                 }
             });
 
-            fetchStats();
+            // Acitivity Feed (keep last 10)
+            setActivities(prev => [
+                { jobId : data.jobId, status: data.status },
+                ...prev.slice(0, 9)
+            ]);
+
+
+            // Status History for chart
+            setStatusHistory(prev => [
+                ...prev.slice(-10),
+                {
+                    time: new Date().toLocaleTimeString(),
+                    completed: data.completed,
+                    failed: data.failed
+                }
+            ]);
+
+            //fetchStats();
         });
 
         return () => socket.off("job-update");
@@ -137,7 +180,8 @@ const Dashboard = () => {
 
                 <button
                     onClick={createJob}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-md transition"
+                    className="bg-blue-600 hover:bg-blue-700 text-white 
+                    px-5 py-2 rounded-xl cursor-pointer"
                 >
                     + Create Job
                 </button>
@@ -149,6 +193,14 @@ const Dashboard = () => {
                 <StatCard title="Active" value={stats.active} />
                 <StatCard title="Completed" value={stats.completed} />
                 <StatCard title="Failed" value={stats.failed} />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="col-span-2">
+                    <Charts stats={stats} statusHistory={statusHistory} />
+                </div>
+
+                <ActivityFeed activities={activities} />
             </div>
 
             {/* Job Table */}
