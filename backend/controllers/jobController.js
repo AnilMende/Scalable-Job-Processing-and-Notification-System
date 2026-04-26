@@ -52,15 +52,16 @@ export const getQueueStats = asyncHandler(async (req, res) => {
         'completed',
         'failed',
         'delayed',
+        'paused'
     );
 
     const data = {
-        waiting : counts.waiting,
-        active : counts.active,
-        delayed : counts.delayed,
-        completed : counts.completed,
-        failed : counts.failed,
-        totalPending : counts.waiting + counts.active + counts.delayed
+        waiting : counts.waiting || 0,
+        active : counts.active || 0,
+        delayed : counts.delayed || 0,
+        completed : counts.completed || 0,
+        failed : counts.failed || 0,
+        totalPending : (counts.waiting || 0) + (counts.active || 0)
     };
 
     return res.status(200).json(
