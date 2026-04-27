@@ -8,6 +8,7 @@ import Charts from "../components/Charts.jsx";
 import ActivityFeed from "../components/ActivityFeed.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
 import StatCard from "../components/StatCard.jsx";
+import api from "../api/axios.js";
 
 const Dashboard = () => {
 
@@ -31,15 +32,10 @@ const Dashboard = () => {
     })
 
 
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZGYzNjFkZDJkMDU3ODlhMzZkZmM0OSIsImlhdCI6MTc3NzIzMDMwNSwiZXhwIjoxNzc3MjMzOTA1fQ.x0Nn9nDaEFWQAf1wJLetkbsbjim37LUCM3wvXEzkcWI"
-
     // Fetch stats
     const fetchStats = async () => {
-        const res = await axios.get("http://localhost:5000/api/jobs/queue-stats", {
-            headers:
-            {
-                Authorization: `Bearer ${token}`
-            }
+        const res = await api.get("/api/jobs/queue-stats", {
+            withCredentials : true
         });
 
         const data = res.data.data;
@@ -79,10 +75,8 @@ const Dashboard = () => {
 
     // Fetch Jobs from DB
     const fetchJobs = async () => {
-        const res = await axios.get("http://localhost:5000/api/jobs/all-jobs", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+        const res = await api.get("/api/jobs/all-jobs", {
+            withCredentials : true
         })
 
         const formatted = res.data.data.map(j => ({
@@ -98,13 +92,11 @@ const Dashboard = () => {
         try {
             //console.log("Creating job...");
 
-            const res = await axios.post(
-                "http://localhost:5000/api/jobs/create-job",
+            const res = await api.post(
+                "/api/jobs/create-job",
                 {},
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    withCredentials : true
                 }
             );
 
