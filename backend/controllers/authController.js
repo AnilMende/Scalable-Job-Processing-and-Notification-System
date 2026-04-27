@@ -9,11 +9,11 @@ import crypto from "node:crypto";
 
 // generating the access token
 export const generateAccessToken = (user) => {
-    
+
     return jwt.sign(
-        { id : user._id },
+        { id: user._id },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn : process.env.ACCESS_TOKEN_EXPIRY }
+        { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
     )
 }
 
@@ -21,9 +21,9 @@ export const generateAccessToken = (user) => {
 export const generateRefreshToken = (user) => {
 
     return jwt.sign(
-        { id : user._id },
+        { id: user._id },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn : process.env.REFRESH_TOKEN_EXPIRY }
+        { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
     )
 }
 
@@ -75,17 +75,18 @@ export const handleRegister = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Something went wrong while registering the user");
     }
 
-    return res.cookie("refreshToken", refreshToken, {
-
+    const cookieOptions = {
         httpOnly: true,
-        secure: true,
-        sameSite: "Strict",
+        secure: false,
+        sameSite: "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000
-    })
-        .status(201)
-        .json(
-            new ApiResponse(201, { accessToken }, "Registered Successfully")
-        )
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken", accessToken,{ ...cookieOptions, maxAge : 60 * 60 * 1000})
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new ApiResponse(200, { accessToken }, "Registration Successfull"))
 
 })
 
@@ -130,14 +131,20 @@ export const handleLogin = asyncHandler(async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
-    return res.cookie("refreshToken", refreshToken, {
+    const cookieOptions = {
         httpOnly: true,
-        secure: true,
-        sameSite: "Strict",
+        secure: false,
+        sameSite: "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000
-    }).status(200).json(
-        new ApiResponse(200, { accessToken }, "Login Successful")
-    )
+    }
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 60 * 60 * 1000 })
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .json(new ApiResponse(200, { accessToken }, "Login Successful"))
+
+    console.log(req.cookies);
 
 })
 

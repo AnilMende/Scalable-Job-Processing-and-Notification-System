@@ -3,6 +3,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import http from "http";
+import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
 
@@ -26,12 +27,15 @@ app.use(cors({
     credentials: true
 }));
 
+app.use(cookieParser());
+
 app.use(express.json());
 
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
+        credentials : true
     }
 })
 
