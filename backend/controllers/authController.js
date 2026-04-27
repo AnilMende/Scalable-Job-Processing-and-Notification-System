@@ -77,7 +77,7 @@ export const handleRegister = asyncHandler(async (req, res) => {
 
     const cookieOptions = {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000
     }
@@ -133,7 +133,7 @@ export const handleLogin = asyncHandler(async (req, res) => {
 
     const cookieOptions = {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000
     }
@@ -144,7 +144,6 @@ export const handleLogin = asyncHandler(async (req, res) => {
         .cookie("refreshToken", refreshToken, cookieOptions)
         .json(new ApiResponse(200, { accessToken }, "Login Successful"))
 
-    console.log(req.cookies);
 
 })
 

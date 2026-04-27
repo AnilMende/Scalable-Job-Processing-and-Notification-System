@@ -80,6 +80,10 @@ const setupSubscriber = async () => {
     })
 }
 
+app.get("/test-auth", (req, res) => {
+    res.send("Server is up and running");
+});
+
 // API Routes
 // Auth Api 
 app.use("/api/auth", authRouter);
@@ -111,6 +115,7 @@ const startServer = async () => {
 }
 
 startServer();
+
 
 //Exporting for future use
 export { io };
