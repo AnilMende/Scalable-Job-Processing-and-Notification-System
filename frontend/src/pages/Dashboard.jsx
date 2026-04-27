@@ -35,7 +35,7 @@ const Dashboard = () => {
     // Fetch stats
     const fetchStats = async () => {
         const res = await api.get("/api/jobs/queue-stats", {
-            withCredentials : true
+            withCredentials: true
         });
 
         const data = res.data.data;
@@ -76,7 +76,7 @@ const Dashboard = () => {
     // Fetch Jobs from DB
     const fetchJobs = async () => {
         const res = await api.get("/api/jobs/all-jobs", {
-            withCredentials : true
+            withCredentials: true
         })
 
         const formatted = res.data.data.map(j => ({
@@ -96,7 +96,7 @@ const Dashboard = () => {
                 "/api/jobs/create-job",
                 {},
                 {
-                    withCredentials : true
+                    withCredentials: true
                 }
             );
 
@@ -126,6 +126,7 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
+
         fetchStats();
         fetchJobs();
 

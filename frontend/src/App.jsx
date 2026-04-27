@@ -1,11 +1,19 @@
 import React from "react";
-import Dashboard from "./pages/Dashboard.jsx";
+
 import { Toaster } from "react-hot-toast";
+import { Routes, Route } from "react-router-dom";
+
+import Login from "./pages/Login.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 const App = () => {
   return(
     <div className="App">
       <Toaster position="top-center"/>
-      <Dashboard/>
+      <Routes>
+        <Route path="/login" element={<Login/>}/>
+        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="*" element={<Login/>}/>
+      </Routes>
     </div>
   )
 }
