@@ -12,10 +12,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { createClient } from "redis";
 
 const pub = createClient({
-    socket : {
-        host : "127.0.0.1",
-        port : 6379
-    }
+    url : process.env.REDIS_URL
 });
 
 
@@ -82,9 +79,8 @@ const worker = new Worker(
 
     },
     {
-        connection: {
-            host: "127.0.0.1",
-            port: 6379
+        connection : {
+            url : process.env.REDIS_URL
         },
         concurrency: 10
 

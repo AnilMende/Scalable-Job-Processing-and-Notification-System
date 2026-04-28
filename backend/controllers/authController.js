@@ -78,15 +78,15 @@ export const handleRegister = asyncHandler(async (req, res) => {
     const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000
     }
 
     return res
-    .status(200)
-    .cookie("accessToken", accessToken,{ ...cookieOptions, maxAge : 60 * 60 * 1000})
-    .cookie("refreshToken", refreshToken, cookieOptions)
-    .json(new ApiResponse(200, { accessToken }, "Registration Successfull"))
+        .status(200)
+        .cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 60 * 60 * 1000 })
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .json(new ApiResponse(200, { accessToken }, "Registration Successfull"))
 
 })
 
@@ -134,7 +134,7 @@ export const handleLogin = asyncHandler(async (req, res) => {
     const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000
     }
 
@@ -142,7 +142,14 @@ export const handleLogin = asyncHandler(async (req, res) => {
         .status(200)
         .cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 60 * 60 * 1000 })
         .cookie("refreshToken", refreshToken, cookieOptions)
-        .json(new ApiResponse(200, { accessToken }, "Login Successful"))
+        .json(new ApiResponse(200, {
+            accessToken,
+            user: {
+                id: user._id,
+                name: user.username,
+                email: user.email
+            }
+        }, "Login Successful"))
 
 
 })
@@ -166,15 +173,11 @@ export const handleLogout = asyncHandler(async (req, res) => {
     }
 
     //then clear the refreshToken from the cookies
-    return res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "Strict"
-    })
+    return res
+        .clearCookie("accessToken")
+        .clearCookie("refreshToken")
         .status(200)
-        .json(
-            new ApiResponse(200, {}, "Logged Out Successfully")
-        )
+        .json(new ApiResponse(200, {}, "Logged out successfully"))
 })
 
 // handleRefresh for generating new access and refresh tokens

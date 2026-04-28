@@ -51,10 +51,7 @@ io.on("connection", (socket) => {
 
 //redis subscriber setup
 const sub = createClient({
-    socket: {
-        host: "127.0.0.1",
-        port: 6379
-    }
+    url : process.env.REDIS_URL
 });
 
 //Redis error handling
