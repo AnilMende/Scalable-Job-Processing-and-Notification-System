@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api/axios.js";
+import toast from "react-hot-toast";
 
 const Login = () => {
 
     const [email, setEmail] = useState("");
 
     const [password, setPassword] = useState("");
-
-    const [error, setError] = useState("");
 
     const navigate = useNavigate()
 
@@ -19,9 +18,10 @@ const Login = () => {
             //these sets the cookies in the browser
             await api.post("/api/auth/login", { email, password })
             //redirect after login
+            toast.success("Logged in successfully");
             navigate("/dashboard");
         } catch (error) {
-            setEmail("Invalid credentials");
+            toast.error("Invalid email or password")
         }
     };
 
@@ -58,10 +58,6 @@ const Login = () => {
                         />
                     </div>
 
-                    {error && (
-                        <p className="text-sm text-red-500">{error}</p>
-                    )}
-
                     <button
                         type="submit"
                         className="w-full mt-1 bg-gray-900 text-white rounded-lg py-2.5 
@@ -69,6 +65,14 @@ const Login = () => {
                     >
                         Sign in
                     </button>
+
+                    <p className="text-center text-sm text-gray-500 mt-2">
+                        Don't have an account?{" "}
+                        <Link to="/register" className="text-gray-900 font-medium hover:underline">
+                            Sign up
+                        </Link>
+                    </p>
+
                 </form>
             </div>
         </div>

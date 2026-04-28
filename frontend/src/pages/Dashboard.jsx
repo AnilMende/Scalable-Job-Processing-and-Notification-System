@@ -1,9 +1,10 @@
 
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { socket } from "../socket.js";
-
 import toast from "react-hot-toast";
+
+import { socket } from "../socket.js";
 import Charts from "../components/Charts.jsx";
 import ActivityFeed from "../components/ActivityFeed.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
@@ -30,6 +31,21 @@ const Dashboard = () => {
         completed: 0,
         time: Date.now()
     })
+
+    const navigate = useNavigate();
+
+    // Handling logout
+    const handleLogout = async () => {
+        try {
+            await api.post("/api/auth/logout");
+            navigate("/login");
+        } catch (error) {
+            console.error("Logout error", error);
+        } finally {
+            navigate("/login");
+            toast.success("Logged Out Successfully");
+        }
+    }
 
 
     // Fetch stats
@@ -176,20 +192,33 @@ const Dashboard = () => {
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-2xl font-bold">Job Processing Dashboard</h1>
 
-                <div className="flex items-center gap-3">
-                    <span className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></span>
-                    <span className="text-sm text-gray-500">System Live</span>
-                </div>
+                <div className="flex items-center gap-4">
+                    {/* Live indicator */}
+                    <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></span>
+                        <span className="text-sm text-gray-500">System Live</span>
+                    </div>
 
-                <button
-                    onClick={createJob}
-                    className="bg-linear-to-r from-blue-600 to-indigo-600 
-               text-white px-5 py-2 rounded-xl 
-               shadow hover:scale-105 active:scale-95 
-               transition duration-200 mb-6 cursor-pointer"
-                >
-                    + Create Job
-                </button>
+                    {/* Create job */}
+                    <button
+                        onClick={createJob}
+                        className="bg-linear-to-r from-blue-600 to-indigo-600 
+                       text-white px-5 py-2 rounded-xl 
+                       shadow hover:scale-105 active:scale-95 
+                       transition duration-200 cursor-pointer"
+                    >
+                        + Create Job
+                    </button>
+
+                    {/* Logout */}
+                    <button
+                        onClick={handleLogout}
+                        className="text-sm text-white bg-red-500 border border-red-300 rounded-lg 
+                        px-3 py-2 hover:bg-red-600 transition-colors cursor-pointer"
+                    >
+                        Sign out
+                    </button>
+                </div>
             </div>
 
             {/* Stats */}

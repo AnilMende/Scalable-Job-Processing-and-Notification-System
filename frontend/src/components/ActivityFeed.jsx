@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 const ActivityFeed = ({ activities }) => {
     return (
 
-        <div className="bg-white rounded-2xl shadow p-4 h-[75] overflow-y-auto">
+        <div className="bg-white rounded-2xl shadow p-4 h-[300px] overflow-y-auto">
             <h2 className="font-semibold mb-3">Live Activity</h2>
 
             {activities.length === 0 ? (
