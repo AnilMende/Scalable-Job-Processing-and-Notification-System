@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config();
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -77,7 +77,7 @@ const setupSubscriber = async () => {
     })
 }
 
-app.get("/test-auth", (req, res) => {
+app.get("/api/test-auth", (req, res) => {
     res.send("Server is up and running");
 });
 
