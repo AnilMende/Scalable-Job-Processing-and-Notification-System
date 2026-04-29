@@ -15,8 +15,8 @@ The application provides live job tracking, queue visibility, and system metrics
 
 ### 🌐 Live Demo
 
-* Frontend: https://your-frontend.vercel.app
-* Backend API: https://your-backend.onrender.com
+* Frontend: https://jobs-processing-system.vercel.app
+* Backend API: https://jobs-processing-backend.onrender.com
 
 ---
 
@@ -44,7 +44,7 @@ Pub/Sub → Socket.io → Real-time UI updates
 * Database: MongoDB
 * Real-time: Socket.io
 
-# Deployment:
+### Deployment:
 
 * Frontend → Vercel
 * Backend → Render
