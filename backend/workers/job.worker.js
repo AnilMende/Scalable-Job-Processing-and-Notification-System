@@ -20,6 +20,8 @@ await pub.connect();
 
 const connection = await getRedisClient();
 
+console.log("Worker Started");
+
 const worker = new Worker(
     "job-queue",
     async (job) => {
