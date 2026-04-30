@@ -20,6 +20,13 @@ The application provides live job tracking, queue visibility, and system metrics
 
 ---
 
+### Test Credentials
+
+* email : anilmende123@gmail.com
+* password : 1234567890
+
+---
+
 ### System Architecture:
 
 Client (Frontend - Vercel)
